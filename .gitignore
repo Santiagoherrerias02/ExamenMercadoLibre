@@ -1,0 +1,49 @@
+# ----------------------------------------------------------------------
+# Configuracion generica de Git (IDE, OS, Gradle)
+# ----------------------------------------------------------------------
+
+# Directorios de Build
+/build/
+/out/
+
+# Gradle Wrapper
+.gradle/
+!gradle/wrapper/gradle-wrapper.jar
+!gradle-wrapper.jar
+
+# Log
+*.log
+
+# ----------------------------------------------------------------------
+# Archivos de Java
+# ----------------------------------------------------------------------
+# Clases compiladas (.class)
+*.class
+
+# Empaquetado (.jar, .war, .ear, .zip)
+*.jar
+*.war
+*.ear
+*.zip
+
+# Archivos de configuracion de la JVM
+hs_err_pid*
+
+# ----------------------------------------------------------------------
+# Archivos de IDE (IntelliJ IDEA)
+# ----------------------------------------------------------------------
+.idea/
+*.iws
+*.iml
+*.ipr
+# Directorio de ejecucion del IDE
+/target/
+
+# ----------------------------------------------------------------------
+# Archivos de Sistema Operativo
+# ----------------------------------------------------------------------
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db
