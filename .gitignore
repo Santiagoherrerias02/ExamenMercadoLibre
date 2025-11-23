@@ -1,49 +1,47 @@
-# ----------------------------------------------------------------------
-# Configuracion generica de Git (IDE, OS, Gradle)
-# ----------------------------------------------------------------------
-
-# Directorios de Build
-/build/
-/out/
-
-# Gradle Wrapper
+# Gradle
 .gradle/
+build/
 !gradle/wrapper/gradle-wrapper.jar
-!gradle-wrapper.jar
+!**/src/main/**/build/
+!**/src/test/**/build/
 
-# Log
-*.log
-
-# ----------------------------------------------------------------------
-# Archivos de Java
-# ----------------------------------------------------------------------
-# Clases compiladas (.class)
-*.class
-
-# Empaquetado (.jar, .war, .ear, .zip)
-*.jar
-*.war
-*.ear
-*.zip
-
-# Archivos de configuracion de la JVM
-hs_err_pid*
-
-# ----------------------------------------------------------------------
-# Archivos de IDE (IntelliJ IDEA)
-# ----------------------------------------------------------------------
+# IntelliJ IDEA
 .idea/
 *.iws
 *.iml
 *.ipr
-# Directorio de ejecucion del IDE
-/target/
+out/
+!**/src/main/**/out/
+!**/src/test/**/out/
 
-# ----------------------------------------------------------------------
-# Archivos de Sistema Operativo
-# ----------------------------------------------------------------------
-# macOS
+# Eclipse
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+bin/
+!**/src/main/**/bin/
+!**/src/test/**/bin/
+
+# VS Code
+.vscode/
+
+# Sistema Operativo
 .DS_Store
-
-# Windows
 Thumbs.db
+
+# Logs
+*.log
+
+# Archivos temporales
+*.tmp
+*.bak
+*.swp
+*~
+
+# JAR (excepto wrapper)
+*.jar
+!gradle-wrapper.jar
