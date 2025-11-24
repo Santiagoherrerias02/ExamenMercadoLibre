@@ -29,7 +29,7 @@ API REST para detectar mutantes analizando secuencias de ADN - Examen MercadoLib
 
 ```bash
 # Clonar repositorio
-git clone <tu-repo>
+git clone https://github.com/Santiagoherrerias02/ExamenMercadoLibre.git
 cd ExamenMercadoLibre
 
 # Compilar y ejecutar tests
