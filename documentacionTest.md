@@ -1,787 +1,449 @@
-# 📚 Documentación Completa de Tests - Proyecto Mutantes
+# 📝 Documentación de Tests - Mutant Detector API
 
 ## 📋 Índice
 
-1. [Introducción al Testing](#introducción-al-testing)
-2. [Teoría de Mocking](#teoría-de-mocking)
-3. [Tests Unitarios - MutantDetectorTest](#tests-unitarios---mutantdetectortest)
-4. [Tests Unitarios con Mocks - MutantServiceTest](#tests-unitarios-con-mocks---mutantservicetest)
-5. [Tests Unitarios con Mocks - StatsServiceTest](#tests-unitarios-con-mocks---statservicetest)
-6. [Tests de Integración - MutantControllerTest](#tests-de-integración---mutantcontrollertest)
-7. [Mejores Prácticas](#mejores-prácticas)
+1. [Visión General](#visión-general)
+2. [Estrategia de Testing](#estrategia-de-testing)
+3. [Tests del Algoritmo - MutantDetectorTest](#tests-del-algoritmo---mutantdetectortest)
+4. [Tests del Servicio - MutantServiceTest](#tests-del-servicio---mutantservicetest)
+5. [Tests de Estadísticas - StatsServiceTest](#tests-de-estadísticas---statsservicetest)
+6. [Tests del Controller - MutantControllerTest](#tests-del-controller---mutantcontrollertest)
+7. [Ejecutar Tests](#ejecutar-tests)
+8. [Cobertura de Código](#cobertura-de-código)
 
 ---
 
-## Introducción al Testing
+## Visión General
 
-### ¿Por qué hacemos tests?
+Este proyecto incluye **35 tests** distribuidos en 4 archivos que cubren:
 
-Los tests son **pruebas automatizadas** que verifican que nuestro código funciona correctamente. Son esenciales porque:
+- ✅ Lógica del algoritmo de detección
+- ✅ Lógica de negocio y persistencia
+- ✅ Cálculo de estadísticas
+- ✅ Endpoints REST
 
-1. ✅ **Detectan bugs antes de producción** - Encuentran errores tempranamente
-2. ✅ **Documentan el comportamiento** - Los tests muestran cómo se usa el código
-3. ✅ **Facilitan refactoring** - Puedes cambiar código con confianza
-4. ✅ **Reducen costos** - Es más barato arreglar bugs en desarrollo que en producción
-5. ✅ **Mejoran el diseño** - El código testeable es generalmente mejor diseñado
+### Distribución de Tests
 
-### Tipos de Tests
-
-```
-┌─────────────────────────────────────────────────────────┐
-│                   PIRÁMIDE DE TESTS                      │
-├─────────────────────────────────────────────────────────┤
-│                                                          │
-│                    /\                                    │
-│                   /  \  E2E Tests                        │
-│                  /    \  (Pocos, lentos, costosos)       │
-│                 /──────\                                 │
-│                /        \                                │
-│               / Integración \                            │
-│              /   Tests      \                            │
-│             /                \                           │
-│            /──────────────────\                          │
-│           /                    \                         │
-│          /    Tests Unitarios   \                        │
-│         /  (Muchos, rápidos,     \                       │
-│        /    baratos)              \                      │
-│       /__________________________ \                      │
-│                                                          │
-└─────────────────────────────────────────────────────────┘
-```
-
-**En este proyecto:**
-- **16 tests unitarios** - MutantDetectorTest (algoritmo puro)
-- **5 tests unitarios con mocks** - MutantServiceTest (lógica de negocio)
-- **6 tests unitarios con mocks** - StatsServiceTest (estadísticas)
-- **8 tests de integración** - MutantControllerTest (endpoints REST)
+| Archivo | Tests | Tipo | Cobertura |
+|---------|-------|------|-----------|
+| MutantDetectorTest | 16 | Unitarios | 96% |
+| MutantServiceTest | 5 | Unitarios (con mocks) | 95% |
+| StatsServiceTest | 6 | Unitarios (con mocks) | 100% |
+| MutantControllerTest | 8 | Integración | 100% |
+| **TOTAL** | **35** | - | **~90%** |
 
 ---
 
-## Teoría de Mocking
+## Estrategia de Testing
 
-### ¿Qué es un Mock?
-
-Un **mock** es un **objeto simulado** que imita el comportamiento de un objeto real. Los usamos en tests para:
-
-1. **Aislar la unidad bajo prueba** - Probar solo una clase sin sus dependencias
-2. **Evitar dependencias externas** - No necesitamos base de datos, APIs, etc.
-3. **Controlar el comportamiento** - Decidimos qué retornan los métodos
-4. **Verificar interacciones** - Confirmamos que se llamaron ciertos métodos
-
-### Analogía del Mundo Real
-
-Imagina que estás probando un coche:
+### Pirámide de Testing Aplicada
 
 ```
-🚗 Test REAL (sin mocks):
-- Necesitas gasolina real
-- Necesitas carreteras reales
-- Necesitas un conductor real
-- Toma horas, es caro, muchas variables
-
-🎮 Test con MOCKS (simulado):
-- Motor simulado (siempre responde "OK")
-- Ruedas simuladas (siempre giran)
-- Frenos simulados (siempre funcionan)
-- Rápido, barato, controlado
+         /\
+        /  \      E2E Tests
+       /    \     (No incluidos)
+      /──────\
+     /        \
+    / Integración \    8 tests - Controller
+   /    Tests      \
+  /                 \
+ /───────────────────\
+/                     \
+/  Tests Unitarios     \   27 tests - Service + Detector
+/_______________________\
 ```
 
-### Librería Mockito
+### Principios Aplicados
 
-**Mockito** es la librería más popular de Java para crear mocks.
-
-#### Conceptos Clave
-
-**1. @Mock - Crear un objeto simulado**
-```java
-@Mock
-private MutantDetector mutantDetector;  // No es el objeto real, es una simulación
-```
-
-**2. @InjectMocks - Inyectar mocks en la clase bajo prueba**
-```java
-@InjectMocks
-private MutantService mutantService;  // Recibe los mocks automáticamente
-```
-
-**3. when().thenReturn() - Definir comportamiento**
-```java
-// "Cuando llames a isMutant(), retorna true"
-when(mutantDetector.isMutant(anyDna)).thenReturn(true);
-```
-
-**4. verify() - Verificar que se llamó un método**
-```java
-// "Verifica que se llamó save() exactamente 1 vez"
-verify(repository, times(1)).save(any());
-```
-
-**5. ArgumentMatchers - Comodines para argumentos**
-```java
-any()           // Cualquier objeto
-anyString()     // Cualquier String
-anyInt()        // Cualquier entero
-eq(value)       // Igual a un valor específico
-```
-
-### Ejemplo Completo de Mocking
-
-```java
-@ExtendWith(MockitoExtension.class)  // Habilita Mockito
-class CalculadoraServiceTest {
-
-    @Mock
-    private CalculadoraBasica calculadora;  // Mock de dependencia
-
-    @InjectMocks
-    private CalculadoraService service;  // Clase bajo prueba
-
-    @Test
-    void testSumar() {
-        // ARRANGE (Preparar)
-        // "Cuando llames a sumar(2, 3), retorna 5"
-        when(calculadora.sumar(2, 3)).thenReturn(5);
-
-        // ACT (Actuar)
-        int resultado = service.calcular(2, 3);
-
-        // ASSERT (Afirmar)
-        assertEquals(5, resultado);
-
-        // VERIFY (Verificar)
-        // "Verifica que se llamó sumar() con 2 y 3"
-        verify(calculadora).sumar(2, 3);
-    }
-}
-```
-
-### ¿Cuándo usar Mocks?
-
-| Situación | ¿Usar Mock? | ¿Por qué? |
-|-----------|-------------|-----------|
-| Probar algoritmo puro | ❌ NO | No tiene dependencias |
-| Probar clase con BD | ✅ SÍ | Evitar conexión real a BD |
-| Probar clase con API externa | ✅ SÍ | Evitar llamadas HTTP reales |
-| Probar clase con otras clases | ✅ SÍ | Aislar la unidad bajo prueba |
-| Probar entidad JPA simple | ❌ NO | Solo getters/setters |
+1. **AAA Pattern** - Arrange, Act, Assert
+2. **Tests independientes** - No comparten estado
+3. **Nombres descriptivos** - Se entiende qué se prueba
+4. **Un concepto por test** - Fácil de debuggear
+5. **Fast tests** - Ejecución rápida (<100ms unitarios)
 
 ---
 
-## Tests Unitarios - MutantDetectorTest
-
-### Descripción General
+## Tests del Algoritmo - MutantDetectorTest
 
 **Archivo:** `src/test/java/org/example/service/MutantDetectorTest.java`
 
-**Objetivo:** Probar el **algoritmo de detección de mutantes** de forma aislada.
+**Objetivo:** Verificar que el algoritmo de detección funcione correctamente en todos los casos.
 
-**Tipo:** Tests unitarios **SIN mocks** (algoritmo puro sin dependencias)
-
-**Total de tests:** 16
-
-### Estructura del Test
+### Configuración
 
 ```java
 @BeforeEach
 void setUp() {
-    mutantDetector = new MutantDetector();  // Crear instancia real
+    mutantDetector = new MutantDetector();
 }
 ```
 
-**@BeforeEach:** Se ejecuta **antes de cada test** para tener un objeto limpio.
+Se crea una instancia nueva antes de cada test para garantizar independencia.
 
 ---
 
-### Test 1: Mutante con Secuencias Horizontal y Diagonal
+### Categoría 1: Tests de Mutantes (7 tests)
+
+Verifican que el algoritmo detecta correctamente ADN mutante.
+
+#### Test 1: Secuencias Horizontal y Diagonal
 
 ```java
 @Test
 @DisplayName("Debe detectar mutante con secuencias horizontal y diagonal")
-void testMutantWithHorizontalAndDiagonalSequences() {
-    String[] dna = {
-        "ATGCGA",  // Fila 0
-        "CAGTGC",  // Fila 1
-        "TTATGT",  // Fila 2
-        "AGAAGG",  // Fila 3
-        "CCCCTA",  // Fila 4 ← Horizontal: CCCC
-        "TCACTG"   // Fila 5
-    };
-    assertTrue(mutantDetector.isMutant(dna));
-}
+void testMutantWithHorizontalAndDiagonalSequences()
 ```
 
-**¿Qué prueba?** Detecta mutante cuando hay **más de una secuencia** de 4 letras iguales.
-
-**Matriz visual:**
+**ADN de entrada:**
 ```
-    0   1   2   3   4   5
-  ┌───┬───┬───┬───┬───┬───┐
-0 │ A │ T │ G │ C │ G │ A │
-  ├───┼───┼───┼───┼───┼───┤
-1 │ C │ A │ G │ T │ G │ C │
-  ├───┼───┼───┼───┼───┼───┤
-2 │ T │ T │ A │ T │ G │ T │
-  ├───┼───┼───┼───┼───┼───┤
-3 │ A │ G │ A │ A │ G │ G │
-  ├───┼───┼───┼───┼───┼───┤
-4 │ C │ C │ C │ C │ T │ A │  ← Secuencia 1: CCCC (horizontal)
-  ├───┼───┼───┼───┼───┼───┤
-5 │ T │ C │ A │ C │ T │ G │
-  └───┴───┴───┴───┴───┴───┘
-
-Diagonal (↘):
-(0,0)A → (1,1)A → (2,2)A → (3,3)A  ← Secuencia 2: AAAA
-
-Resultado: 2 secuencias encontradas → ES MUTANTE ✅
+ATGCGA
+CAGTGC
+TTATGT
+AGAAGG
+CCCCTA  ← Horizontal: CCCC
+TCACTG
 ```
 
-**Assertion:**
-- `assertTrue()` - Verifica que el resultado sea `true`
+**¿Qué verifica?**
+- Encuentra secuencia horizontal en fila 4
+- Encuentra secuencia diagonal
+- Retorna `true` (es mutante)
+
+**Assertion:** `assertTrue(mutantDetector.isMutant(dna))`
 
 ---
 
-### Test 2: Mutante con Secuencias Verticales
+#### Test 2: Secuencias Verticales
 
 ```java
 @Test
 @DisplayName("Debe detectar mutante con secuencias verticales")
-void testMutantWithVerticalSequences() {
-    String[] dna = {
-        "AAAAGA",  // 4 A's en columna 0
-        "CAGTGC",
-        "TTATGT",
-        "AGAAGG",
-        "CACCTA",
-        "TCACTG"
-    };
-    assertTrue(mutantDetector.isMutant(dna));
-}
+void testMutantWithVerticalSequences()
 ```
 
-**¿Qué prueba?** Detecta secuencias **verticales** (columnas).
-
-**Matriz visual:**
-```
-Columna 0:
-A  ← Fila 0
-A  ← Fila 1 (C en realidad, pero primera fila tiene 4 A's)
-A  ← ...
-A  ← ...
-
-Primera fila: AAAAGA
-- Horizontal: AAAA (secuencia 1)
-- Vertical en columna 0: depende de las demás filas
-```
-
-**Nota:** Este test verifica que el algoritmo detecta verticales correctamente.
+**¿Qué verifica?**
+- Detección de 4 letras iguales en columnas
+- Búsqueda vertical funciona correctamente
 
 ---
 
-### Test 3: Múltiples Secuencias Horizontales
+#### Test 3: Múltiples Horizontales
 
 ```java
 @Test
 @DisplayName("Debe detectar mutante con múltiples secuencias horizontales")
-void testMutantWithMultipleHorizontalSequences() {
-    String[] dna = {
-        "TTTTGA",  // Secuencia 1: TTTT
-        "CAGTGC",
-        "TTATGT",
-        "AGAAGG",
-        "CCCCTA",  // Secuencia 2: CCCC
-        "TCACTG"
-    };
-    assertTrue(mutantDetector.isMutant(dna));
-}
+void testMutantWithMultipleHorizontalSequences()
 ```
 
-**¿Qué prueba?** Detecta **múltiples horizontales** en diferentes filas.
+**ADN de entrada:**
+```
+TTTTGA  ← Secuencia 1: TTTT
+CAGTGC
+TTATGT
+AGAAGG
+CCCCTA  ← Secuencia 2: CCCC
+TCACTG
+```
 
-**Secuencias encontradas:**
-1. Fila 0: `TTTT` (posiciones 0-3)
-2. Fila 4: `CCCC` (posiciones 0-3)
-
-**Resultado:** 2 secuencias → ES MUTANTE ✅
+**¿Qué verifica?**
+- Encuentra más de una secuencia
+- No se detiene en la primera
 
 ---
 
-### Test 4: Diagonales Ascendentes y Descendentes
+#### Test 4: Diagonales Ascendentes y Descendentes
 
 ```java
 @Test
 @DisplayName("Debe detectar mutante con diagonales ascendentes y descendentes")
-void testMutantWithBothDiagonals() {
-    String[] dna = {
-        "ATGCGA",
-        "CAGTGC",
-        "TTATTT",  // Modificado para crear secuencias
-        "AGAAGG",
-        "CCCCTA",
-        "TCACTG"
-    };
-    assertTrue(mutantDetector.isMutant(dna));
-}
+void testMutantWithBothDiagonals()
 ```
 
-**¿Qué prueba?** Detecta secuencias en **ambas direcciones diagonales**.
-
-**Diagonales:**
-- **Descendente (↘):** De arriba-izquierda a abajo-derecha
-- **Ascendente (↗):** De abajo-izquierda a arriba-derecha
+**¿Qué verifica?**
+- Diagonal descendente (↘): De arriba-izq a abajo-der
+- Diagonal ascendente (↗): De abajo-izq a arriba-der
 
 ---
 
-### Test 5: NO Mutante - Solo 1 Secuencia
+#### Test 5: Matriz Grande 10x10
 
 ```java
 @Test
-@DisplayName("No debe detectar mutante con una sola secuencia")
-void testNotMutantWithOnlyOneSequence() {
-    String[] dna = {
-        "ATGCGA",
-        "CAGTGC",
-        "TTATTT",  // Solo 1 secuencia: TTT (solo 3, no cuenta)
-        "AGACGG",
-        "GCGTCA",
-        "TCACTG"
-    };
-    assertFalse(mutantDetector.isMutant(dna));
-}
+@DisplayName("Debe detectar mutante en matriz grande 10x10")
+void testMutantWithLargeDna()
 ```
 
-**¿Qué prueba?** Un humano **NO es mutante** si solo tiene 1 (o 0) secuencias.
-
-**Regla clave:** Se necesitan **MÁS DE UNA** secuencia (>1, no ≥1).
-
-**Assertion:**
-- `assertFalse()` - Verifica que el resultado sea `false`
+**¿Qué verifica?**
+- Escalabilidad del algoritmo
+- Funciona con matrices mayores a 6x6
 
 ---
 
-### Test 6: NO Mutante - Sin Secuencias
-
-```java
-@Test
-@DisplayName("No debe detectar mutante sin secuencias")
-void testNotMutantWithNoSequences() {
-    String[] dna = {
-        "ATGC",
-        "CAGT",
-        "TTAT",
-        "AGAC"
-    };
-    assertFalse(mutantDetector.isMutant(dna));
-}
-```
-
-**¿Qué prueba?** Matriz sin ninguna secuencia de 4 iguales.
-
-**Matriz 4x4 (mínimo tamaño):**
-```
-A T G C
-C A G T
-T T A T
-A G A C
-```
-
-No hay 4 letras iguales consecutivas en ninguna dirección.
-
----
-
-### Test 7: Validación - DNA Nulo
-
-```java
-@Test
-@DisplayName("Debe rechazar ADN nulo")
-void testNullDna() {
-    assertFalse(mutantDetector.isMutant(null));
-}
-```
-
-**¿Qué prueba?** El algoritmo **no lanza excepción** con entrada `null`, retorna `false`.
-
-**Validación defensiva:** Verificar null antes de procesar.
-
----
-
-### Test 8: Validación - DNA Vacío
-
-```java
-@Test
-@DisplayName("Debe rechazar ADN vacío")
-void testEmptyDna() {
-    String[] dna = {};
-    assertFalse(mutantDetector.isMutant(dna));
-}
-```
-
-**¿Qué prueba?** Array vacío `[]` retorna `false`.
-
----
-
-### Test 9: Validación - Matriz No Cuadrada
-
-```java
-@Test
-@DisplayName("Debe rechazar matriz no cuadrada")
-void testNonSquareMatrix() {
-    String[] dna = {
-        "ATGCGA",  // 6 caracteres
-        "CAGTGC",  // 6 caracteres
-        "TTATGT"   // 6 caracteres, pero solo 3 filas
-    };
-    assertFalse(mutantDetector.isMutant(dna));
-}
-```
-
-**¿Qué prueba?** Matriz **3x6** (no cuadrada) retorna `false`.
-
-**Regla:** Debe ser **NxN** (cuadrada).
-
-**Validación:**
-```java
-if (dna.length != dna[0].length()) {
-    return false;  // No es cuadrada
-}
-```
-
----
-
-### Test 10: Validación - Caracteres Inválidos
-
-```java
-@Test
-@DisplayName("Debe rechazar caracteres inválidos")
-void testInvalidCharacters() {
-    String[] dna = {
-        "ATGCGA",
-        "CAGTXC",  // ← 'X' es inválido
-        "TTATGT",
-        "AGAAGG",
-        "CCCCTA",
-        "TCACTG"
-    };
-    assertFalse(mutantDetector.isMutant(dna));
-}
-```
-
-**¿Qué prueba?** Solo acepta caracteres **A, T, C, G**.
-
-**Caracteres válidos:**
-- `A` - Adenina
-- `T` - Timina
-- `C` - Citosina
-- `G` - Guanina
-
-Cualquier otro carácter (X, N, etc.) es inválido.
-
----
-
-### Test 11: Matriz Pequeña 4x4
-
-```java
-@Test
-@DisplayName("Debe detectar mutante en matriz pequeña 4x4")
-void testSmallMatrix4x4Mutant() {
-    String[] dna = {
-        "AAAA",  // Horizontal: AAAA
-        "CCCC",  // Horizontal: CCCC
-        "TTAT",
-        "AGAC"
-    };
-    assertTrue(mutantDetector.isMutant(dna));
-}
-```
-
-**¿Qué prueba?** Funciona con el **tamaño mínimo** (4x4).
-
-**2 secuencias horizontales:**
-1. Fila 0: `AAAA`
-2. Fila 1: `CCCC`
-
----
-
-### Test 12: Matriz Grande 10x10
-
-```java
-@Test
-@DisplayName("Debe manejar matriz grande 10x10")
-void testLargeMatrix10x10() {
-    String[] dna = {
-        "ATGCGAATGC",
-        "CAGTGCCAGT",
-        "TTATGTTTAT",
-        "AGAAGGATAA",
-        "CCCCTACCCC",  // 2 horizontales: CCCC (pos 0-3 y 6-9)
-        "TCACTGTCAC",
-        "ATGCGAATGC",
-        "CAGTGCCAGT",
-        "TTATGTTTAT",
-        "AGAAGGATAA"
-    };
-    assertTrue(mutantDetector.isMutant(dna));
-}
-```
-
-**¿Qué prueba?** El algoritmo **escala** a matrices grandes.
-
-**Complejidad:** O(N²) donde N=10 → 100 iteraciones (aceptable).
-
----
-
-### Test 13: Diagonal Ascendente
-
-```java
-@Test
-@DisplayName("Debe detectar diagonal ascendente")
-void testAscendingDiagonal() {
-    String[] dna = {
-        "ATGCGA",
-        "CAGTGC",
-        "TTATGT",
-        "AGAAGG",
-        "CCGCTA",
-        "TCGCTG"
-    };
-    boolean result = mutantDetector.isMutant(dna);
-    assertNotNull(result);  // Solo verifica que no lanza excepción
-}
-```
-
-**¿Qué prueba?** Detecta diagonales ascendentes (↗).
-
-**Ejemplo de diagonal ascendente:**
-```
-    0   1   2   3
-  ┌───┬───┬───┬───┐
-0 │   │   │   │ G │ ← Fin
-  ├───┼───┼───┼───┤
-1 │   │   │ G │   │
-  ├───┼───┼───┼───┤
-2 │   │ G │   │   │
-  ├───┼───┼───┼───┤
-3 │ G │   │   │   │ ← Inicio
-  └───┴───┴───┴───┘
-```
-
----
-
-### Test 14: Early Termination (Optimización)
-
-```java
-@Test
-@DisplayName("Debe usar early termination para eficiencia")
-void testEarlyTermination() {
-    String[] dna = {
-        "AAAAGA",  // Secuencia 1
-        "AAAAGC",  // Secuencia 2
-        "TTATGT",  // Ya no se revisa (early termination)
-        "AGAAGG",
-        "CCCCTA",
-        "TCACTG"
-    };
-
-    long startTime = System.nanoTime();
-    boolean result = mutantDetector.isMutant(dna);
-    long endTime = System.nanoTime();
-
-    assertTrue(result);
-    assertTrue((endTime - startTime) < 10_000_000); // < 10ms
-}
-```
-
-**¿Qué prueba?** El algoritmo **termina temprano** al encontrar >1 secuencias.
-
-**Early Termination:**
-```java
-if (sequenceCount > 1) {
-    return true;  // ← Para aquí, no sigue buscando
-}
-```
-
-**Beneficio:** En lugar de revisar toda la matriz, para apenas encuentra 2 secuencias.
-
-**Mejora de rendimiento:**
-- Sin early termination: 100% de la matriz
-- Con early termination: ~5-30% de la matriz (depende de dónde estén las secuencias)
-
----
-
-### Test 15: Todas las Bases Iguales
+#### Test 6: Todas las Bases Iguales
 
 ```java
 @Test
 @DisplayName("Debe detectar mutante con todas las bases iguales")
-void testAllSameBases() {
-    String[] dna = {
-        "AAAAAA",
-        "AAAAAA",
-        "AAAAAA",
-        "AAAAAA",
-        "AAAAAA",
-        "AAAAAA"
-    };
-    assertTrue(mutantDetector.isMutant(dna));
-}
+void testMutantAllSameCharacter()
 ```
 
-**¿Qué prueba?** Caso extremo donde **todo es igual**.
+**ADN de entrada:**
+```
+AAAAAA
+AAAAAA
+AAAAAA
+AAAAAA
+AAAAAA
+AAAAAA
+```
 
-**Secuencias encontradas:**
-- Todas las horizontales: 6 secuencias
-- Todas las verticales: 6 secuencias
-- Todas las diagonales: múltiples secuencias
-
-**Early termination:** Para en la primera fila después de encontrar 2 secuencias.
+**¿Qué verifica?**
+- Caso extremo: todo igual
+- Early termination funciona (para rápido)
 
 ---
 
-### Test 16: Fila Nula en el Array
+#### Test 7: Matriz Mínima 4x4
+
+```java
+@Test
+@DisplayName("Debe detectar mutante en matriz mínima 4x4")
+void testMutantSmallMatrix4x4()
+```
+
+**ADN de entrada:**
+```
+AAAA  ← Secuencia 1
+CCCC  ← Secuencia 2
+TTAT
+AGAC
+```
+
+**¿Qué verifica?**
+- Funciona con tamaño mínimo permitido (4x4)
+
+---
+
+### Categoría 2: Tests de Humanos (2 tests)
+
+Verifican que el algoritmo rechaza correctamente ADN humano.
+
+#### Test 8: Una Sola Secuencia
+
+```java
+@Test
+@DisplayName("No debe detectar mutante con una sola secuencia")
+void testNotMutantWithOnlyOneSequence()
+```
+
+**¿Qué verifica?**
+- Con 1 secuencia → NO es mutante
+- Se necesitan **más de 1** (>1, no ≥1)
+
+**Assertion:** `assertFalse(mutantDetector.isMutant(dna))`
+
+---
+
+#### Test 9: Sin Secuencias
+
+```java
+@Test
+@DisplayName("No debe detectar mutante sin secuencias")
+void testNotMutantWithNoSequences()
+```
+
+**¿Qué verifica?**
+- Sin ninguna secuencia de 4 → NO es mutante
+
+---
+
+### Categoría 3: Tests de Validación (6 tests)
+
+Verifican que el algoritmo valida correctamente entradas inválidas.
+
+#### Test 10: ADN Nulo
+
+```java
+@Test
+@DisplayName("Debe rechazar ADN nulo")
+void testNullDna()
+```
+
+**¿Qué verifica?**
+- `null` retorna `false` (no lanza excepción)
+- Validación defensiva
+
+---
+
+#### Test 11: ADN Vacío
+
+```java
+@Test
+@DisplayName("Debe rechazar ADN vacío")
+void testEmptyDna()
+```
+
+**¿Qué verifica?**
+- Array vacío `[]` retorna `false`
+
+---
+
+#### Test 12: Matriz No Cuadrada
+
+```java
+@Test
+@DisplayName("Debe rechazar matriz no cuadrada")
+void testNonSquareMatrix()
+```
+
+**ADN de entrada:**
+```
+ATGCGA  ← 6 caracteres
+CAGTGC  ← 6 caracteres
+TTATGT  ← 6 caracteres
+        (solo 3 filas) ❌
+```
+
+**¿Qué verifica?**
+- Matriz debe ser NxN (cuadrada)
+- 3x6 es inválida
+
+---
+
+#### Test 13: Caracteres Inválidos
+
+```java
+@Test
+@DisplayName("Debe rechazar caracteres inválidos")
+void testInvalidCharacters()
+```
+
+**ADN de entrada:**
+```
+ATGCGA
+CAGTXC  ← 'X' es inválido ❌
+TTATGT
+```
+
+**¿Qué verifica?**
+- Solo acepta: A, T, C, G
+- Otros caracteres → inválido
+
+---
+
+#### Test 14: Fila Nula
 
 ```java
 @Test
 @DisplayName("Debe rechazar fila nula en el array")
-void testNullRowInArray() {
-    String[] dna = {
-        "ATGCGA",
-        null,      // ← Fila nula
-        "TTATGT",
-        "AGAAGG",
-        "CCCCTA",
-        "TCACTG"
-    };
-    assertFalse(mutantDetector.isMutant(dna));
-}
+void testNullRowInArray()
 ```
 
-**¿Qué prueba?** Valida que ninguna fila sea `null`.
+**¿Qué verifica?**
+- Ninguna fila puede ser `null`
 
-**Validación:**
+---
+
+#### Test 15: Matriz Muy Pequeña
+
 ```java
-for (String row : dna) {
-    if (row == null) {
-        return false;
-    }
+@Test
+@DisplayName("Debe rechazar matriz muy pequeña (menor a 4x4)")
+void testTooSmallMatrix()
+```
+
+**¿Qué verifica?**
+- Tamaño mínimo es 4x4
+- 3x3 o menor es inválido
+
+---
+
+### Categoría 4: Test de Optimización (1 test)
+
+#### Test 16: Early Termination
+
+```java
+@Test
+@DisplayName("Debe usar early termination para eficiencia")
+void testEarlyTermination()
+```
+
+**¿Qué verifica?**
+- El algoritmo **para** al encontrar 2+ secuencias
+- No revisa toda la matriz innecesariamente
+- Tiempo de ejecución < 10ms
+
+**Código clave:**
+```java
+if (sequenceCount > 1) {
+    return true;  // ← Para aquí
 }
 ```
 
 ---
 
-### Resumen de MutantDetectorTest
-
-| Categoría | Tests | Objetivo |
-|-----------|-------|----------|
-| **Mutantes (true)** | 7 | Detectar correctamente mutantes |
-| **Humanos (false)** | 2 | Detectar correctamente humanos |
-| **Validaciones (false)** | 6 | Rechazar entradas inválidas |
-| **Optimización** | 1 | Verificar early termination |
-| **Total** | **16** | Cobertura completa del algoritmo |
-
-**Cobertura de código:** ~96% en MutantDetector.java
-
----
-
-## Tests Unitarios con Mocks - MutantServiceTest
-
-### Descripción General
+## Tests del Servicio - MutantServiceTest
 
 **Archivo:** `src/test/java/org/example/service/MutantServiceTest.java`
 
-**Objetivo:** Probar la **lógica de negocio** de MutantService.
+**Objetivo:** Verificar la lógica de negocio, caché y persistencia.
 
-**Tipo:** Tests unitarios **CON mocks** (tiene dependencias)
-
-**Total de tests:** 5
-
-### Dependencias Mockeadas
+### Configuración con Mockito
 
 ```java
-@ExtendWith(MockitoExtension.class)  // Habilita Mockito
+@ExtendWith(MockitoExtension.class)
 class MutantServiceTest {
 
     @Mock
-    private MutantDetector mutantDetector;  // Mock (simulado)
+    private MutantDetector mutantDetector;
 
     @Mock
-    private DnaRecordRepository dnaRecordRepository;  // Mock (simulado)
+    private DnaRecordRepository dnaRecordRepository;
 
     @InjectMocks
-    private MutantService mutantService;  // Clase bajo prueba (recibe mocks)
+    private MutantService mutantService;
 }
 ```
 
 **¿Por qué mocks?**
 - `MutantDetector`: Ya está testeado, no necesitamos probarlo de nuevo
-- `DnaRecordRepository`: No queremos conectar a BD real en tests unitarios
+- `DnaRecordRepository`: No queremos conectar a BD real
 
 ---
 
-### Test 1: Analizar ADN Mutante y Guardarlo
+### Test 1: Analizar y Guardar Mutante
 
 ```java
 @Test
 @DisplayName("Debe analizar ADN mutante y guardarlo en DB")
-void testAnalyzeMutantDnaAndSave() {
-    // ARRANGE (Preparar)
-    when(dnaRecordRepository.findByDnaHash(anyString()))
-        .thenReturn(Optional.empty());  // No existe en BD
-    when(mutantDetector.isMutant(mutantDna))
-        .thenReturn(true);  // Es mutante
-    when(dnaRecordRepository.save(any(DnaRecord.class)))
-        .thenReturn(new DnaRecord());  // Guardado exitoso
-
-    // ACT (Actuar)
-    boolean result = mutantService.analyzeDna(mutantDna);
-
-    // ASSERT (Afirmar)
-    assertTrue(result);
-
-    // VERIFY (Verificar interacciones)
-    verify(mutantDetector, times(1)).isMutant(mutantDna);
-    verify(dnaRecordRepository, times(1)).save(any(DnaRecord.class));
-}
+void testAnalyzeMutantDnaAndSave()
 ```
 
 **Flujo del test:**
-
-```
-1. findByDnaHash() → Optional.empty() (no está en BD)
-2. isMutant() → true (es mutante)
-3. save() → new DnaRecord() (guardado)
-4. Resultado: true
-```
+1. Mock: `findByDnaHash()` → `Optional.empty()` (no existe)
+2. Mock: `isMutant()` → `true` (es mutante)
+3. Ejecutar: `analyzeDna(dna)`
+4. Verificar: Se llamó a `save()` una vez
 
 **Verificaciones:**
-- ✅ `isMutant()` fue llamado 1 vez
-- ✅ `save()` fue llamado 1 vez
-- ✅ Resultado es `true`
+```java
+verify(mutantDetector, times(1)).isMutant(mutantDna);
+verify(dnaRecordRepository, times(1)).save(any(DnaRecord.class));
+```
 
 ---
 
-### Test 2: Analizar ADN Humano y Guardarlo
+### Test 2: Analizar y Guardar Humano
 
 ```java
 @Test
 @DisplayName("Debe analizar ADN humano y guardarlo en DB")
-void testAnalyzeHumanDnaAndSave() {
-    when(dnaRecordRepository.findByDnaHash(anyString()))
-        .thenReturn(Optional.empty());
-    when(mutantDetector.isMutant(humanDna))
-        .thenReturn(false);  // Es humano
-    when(dnaRecordRepository.save(any(DnaRecord.class)))
-        .thenReturn(new DnaRecord());
-
-    boolean result = mutantService.analyzeDna(humanDna);
-
-    assertFalse(result);
-    verify(mutantDetector, times(1)).isMutant(humanDna);
-    verify(dnaRecordRepository, times(1)).save(any(DnaRecord.class));
-}
+void testAnalyzeHumanDnaAndSave()
 ```
 
-**Diferencia con Test 1:** `isMutant()` retorna `false`.
-
-**Resultado esperado:** `false` (humano)
+**Diferencia con Test 1:**
+- Mock: `isMutant()` → `false`
+- Resultado esperado: `false`
 
 ---
 
@@ -790,41 +452,24 @@ void testAnalyzeHumanDnaAndSave() {
 ```java
 @Test
 @DisplayName("Debe retornar resultado cacheado si el ADN ya fue analizado")
-void testReturnCachedResultForAnalyzedDna() {
-    // ARRANGE
-    DnaRecord cachedRecord = new DnaRecord("somehash", true);
-    when(dnaRecordRepository.findByDnaHash(anyString()))
-        .thenReturn(Optional.of(cachedRecord));  // YA existe en BD
-
-    // ACT
-    boolean result = mutantService.analyzeDna(mutantDna);
-
-    // ASSERT
-    assertTrue(result);
-
-    // VERIFY - NO debe llamar al detector ni guardar
-    verify(mutantDetector, never()).isMutant(any());
-    verify(dnaRecordRepository, never()).save(any());
-}
+void testReturnCachedResultForAnalyzedDna()
 ```
 
 **Flujo del test:**
+1. Mock: `findByDnaHash()` → `Optional.of(record)` (YA existe)
+2. Ejecutar: `analyzeDna(dna)`
+3. Verificar: NO se llamó a `isMutant()` ni a `save()`
 
-```
-1. findByDnaHash() → Optional.of(record) (YA está en BD)
-2. Retornar record.isMutant() directamente
-3. NO llamar a isMutant()
-4. NO llamar a save()
-```
-
-**Optimización de caché:**
-- Si el DNA ya fue analizado, **no se vuelve a procesar**
-- Se retorna el resultado guardado en BD
+**¿Por qué es importante?**
+- Si el ADN ya fue analizado, NO se reprocesa
+- Se retorna el resultado guardado (caché)
 - Ahorra tiempo de procesamiento
 
-**Verificaciones importantes:**
-- ✅ `never()` - Verifica que **nunca** se llamó
-- ✅ No se desperdicia tiempo re-analizando
+**Verificaciones:**
+```java
+verify(mutantDetector, never()).isMutant(any());
+verify(dnaRecordRepository, never()).save(any());
+```
 
 ---
 
@@ -833,27 +478,17 @@ void testReturnCachedResultForAnalyzedDna() {
 ```java
 @Test
 @DisplayName("Debe generar hash consistente para el mismo ADN")
-void testConsistentHashGeneration() {
-    when(dnaRecordRepository.findByDnaHash(anyString()))
-        .thenReturn(Optional.empty());
-    when(mutantDetector.isMutant(any()))
-        .thenReturn(true);
-
-    mutantService.analyzeDna(mutantDna);
-    mutantService.analyzeDna(mutantDna);  // Mismo DNA otra vez
-
-    // Debe buscar por el mismo hash ambas veces
-    verify(dnaRecordRepository, times(2)).findByDnaHash(anyString());
-}
+void testConsistentHashGeneration()
 ```
 
-**¿Qué prueba?** El mismo DNA genera el **mismo hash** siempre.
-
-**Importancia:** Si el hash cambia, la caché no funciona.
+**¿Qué verifica?**
+- El mismo ADN genera el **mismo hash** siempre
+- Crucial para que la caché funcione
 
 **Hash SHA-256:**
-- Entrada: `["ATGCGA", "CAGTGC", ...]`
-- Salida: `"3a5f2c9e8b1d4f7a..."`  (siempre igual para la misma entrada)
+- Input: `["ATGCGA", "CAGTGC", ...]`
+- Output: `"3a5f2c9e8b1d4f7a..."` (64 caracteres hex)
+- Siempre igual para la misma entrada
 
 ---
 
@@ -862,65 +497,66 @@ void testConsistentHashGeneration() {
 ```java
 @Test
 @DisplayName("Debe guardar registro con hash correcto")
-void testSavesRecordWithCorrectHash() {
-    when(dnaRecordRepository.findByDnaHash(anyString()))
-        .thenReturn(Optional.empty());
-    when(mutantDetector.isMutant(mutantDna))
-        .thenReturn(true);
-
-    mutantService.analyzeDna(mutantDna);
-
-    verify(dnaRecordRepository).save(argThat(record ->
-        record.getDnaHash() != null &&
-        record.getDnaHash().length() == 64 &&  // SHA-256 = 64 chars hex
-        record.isMutant()
-    ));
-}
+void testSavesRecordWithCorrectHash()
 ```
 
-**¿Qué prueba?** El registro guardado tiene:
-- ✅ Hash no nulo
-- ✅ Hash de 64 caracteres (SHA-256 en hexadecimal)
-- ✅ `isMutant` correcto
+**¿Qué verifica?**
+- El registro guardado tiene:
+    - Hash no nulo
+    - Hash de 64 caracteres (SHA-256)
+    - Campo `isMutant` correcto
 
-**argThat()** - Matcher personalizado:
+**Matcher personalizado:**
 ```java
-argThat(record ->
-    // Condiciones que debe cumplir el argumento
+verify(dnaRecordRepository).save(argThat(record ->
     record.getDnaHash() != null &&
-    record.getDnaHash().length() == 64
-)
+    record.getDnaHash().length() == 64 &&
+    record.isMutant()
+));
 ```
 
 ---
 
-## Tests Unitarios con Mocks - StatsServiceTest
-
-### Descripción General
+## Tests de Estadísticas - StatsServiceTest
 
 **Archivo:** `src/test/java/org/example/service/StatsServiceTest.java`
 
-**Objetivo:** Probar el cálculo de **estadísticas**.
+**Objetivo:** Verificar el cálculo correcto de estadísticas.
 
-**Total de tests:** 6
+### Configuración
 
-### Test 1: Estadísticas Correctas
+```java
+@ExtendWith(MockitoExtension.class)
+class StatsServiceTest {
+
+    @Mock
+    private DnaRecordRepository dnaRecordRepository;
+
+    @InjectMocks
+    private StatsService statsService;
+}
+```
+
+---
+
+### Test 1: Cálculo Correcto de Estadísticas
 
 ```java
 @Test
 @DisplayName("Debe calcular estadísticas correctamente")
-void testGetStatsWithData() {
-    // ARRANGE
-    when(dnaRecordRepository.countByIsMutant(true)).thenReturn(40L);
-    when(dnaRecordRepository.countByIsMutant(false)).thenReturn(100L);
+void testGetStatsWithData()
+```
 
-    // ACT
-    StatsResponse stats = statsService.getStats();
+**Mocks:**
+- `countByIsMutant(true)` → 40 mutantes
+- `countByIsMutant(false)` → 100 humanos
 
-    // ASSERT
-    assertEquals(40, stats.getCountMutantDna());
-    assertEquals(100, stats.getCountHumanDna());
-    assertEquals(0.4, stats.getRatio(), 0.001);  // 40/100 = 0.4
+**Resultado esperado:**
+```json
+{
+  "count_mutant_dna": 40,
+  "count_human_dna": 100,
+  "ratio": 0.4
 }
 ```
 
@@ -931,42 +567,26 @@ ratio = count_mutant_dna / count_human_dna
       = 0.4
 ```
 
-**Delta en assertEquals:**
-```java
-assertEquals(expected, actual, delta);
-//           0.4       0.4      0.001  ← Tolerancia para doubles
-```
-
-**¿Por qué delta?** Los números de punto flotante tienen pequeños errores de precisión.
-
 ---
 
-### Test 2: Sin Humanos
+### Test 2: Ratio sin Humanos
 
 ```java
 @Test
-@DisplayName("Debe retornar ratio 0 cuando no hay humanos")
-void testGetStatsWithNoHumans() {
-    when(dnaRecordRepository.countByIsMutant(true)).thenReturn(10L);
-    when(dnaRecordRepository.countByIsMutant(false)).thenReturn(0L);
-
-    StatsResponse stats = statsService.getStats();
-
-    assertEquals(10, stats.getCountMutantDna());
-    assertEquals(0, stats.getCountHumanDna());
-    assertEquals(10.0, stats.getRatio(), 0.001);  // Caso especial
-}
+@DisplayName("Debe retornar ratio correcto cuando no hay humanos")
+void testGetStatsWithNoHumans()
 ```
 
-**Caso especial - División por cero:**
+**Caso especial:**
+- 10 mutantes, 0 humanos
+- División por cero → ratio = 10.0 (no infinito)
+
+**Lógica implementada:**
 ```java
 if (countHuman == 0) {
     return countMutant > 0 ? countMutant : 0.0;
 }
 ```
-
-**Ratio cuando no hay humanos:**
-- 10 mutantes, 0 humanos → ratio = 10.0 (no 0.4 ni infinito)
 
 ---
 
@@ -975,19 +595,12 @@ if (countHuman == 0) {
 ```java
 @Test
 @DisplayName("Debe retornar ratio 0 cuando no hay datos")
-void testGetStatsWithNoData() {
-    when(dnaRecordRepository.countByIsMutant(true)).thenReturn(0L);
-    when(dnaRecordRepository.countByIsMutant(false)).thenReturn(0L);
-
-    StatsResponse stats = statsService.getStats();
-
-    assertEquals(0, stats.getCountMutantDna());
-    assertEquals(0, stats.getCountHumanDna());
-    assertEquals(0.0, stats.getRatio(), 0.001);
-}
+void testGetStatsWithNoData()
 ```
 
-**Caso inicial:** BD vacía → todos los contadores en 0.
+**Caso inicial:**
+- 0 mutantes, 0 humanos
+- ratio = 0.0
 
 ---
 
@@ -996,24 +609,23 @@ void testGetStatsWithNoData() {
 ```java
 @Test
 @DisplayName("Debe calcular ratio con decimales correctamente")
-void testGetStatsWithDecimalRatio() {
-    when(dnaRecordRepository.countByIsMutant(true)).thenReturn(1L);
-    when(dnaRecordRepository.countByIsMutant(false)).thenReturn(3L);
-
-    StatsResponse stats = statsService.getStats();
-
-    assertEquals(1, stats.getCountMutantDna());
-    assertEquals(3, stats.getCountHumanDna());
-    assertEquals(0.333, stats.getRatio(), 0.001);  // 1/3 = 0.333...
-}
+void testGetStatsWithDecimalRatio()
 ```
 
-**Ratio con decimales:**
+**Cálculo:**
 ```
-1 / 3 = 0.333333...
+1 mutante / 3 humanos = 0.333...
 ```
 
-**Redondeo:** Se compara con delta de 0.001 (3 decimales de precisión).
+**Assertion con delta:**
+```java
+assertEquals(0.333, stats.getRatio(), 0.001);
+//           ↑ esperado  ↑ actual     ↑ tolerancia
+```
+
+**¿Por qué delta?**
+- Números de punto flotante tienen pequeños errores de precisión
+- Delta de 0.001 = tolerancia de 3 decimales
 
 ---
 
@@ -1022,19 +634,12 @@ void testGetStatsWithDecimalRatio() {
 ```java
 @Test
 @DisplayName("Debe retornar ratio 1.0 cuando hay igual cantidad")
-void testGetStatsWithEqualCounts() {
-    when(dnaRecordRepository.countByIsMutant(true)).thenReturn(50L);
-    when(dnaRecordRepository.countByIsMutant(false)).thenReturn(50L);
-
-    StatsResponse stats = statsService.getStats();
-
-    assertEquals(50, stats.getCountMutantDna());
-    assertEquals(50, stats.getCountHumanDna());
-    assertEquals(1.0, stats.getRatio(), 0.001);  // 50/50 = 1.0
-}
+void testGetStatsWithEqualCounts()
 ```
 
-**Ratio 1.0:** Igual cantidad de mutantes que humanos.
+**Caso:**
+- 50 mutantes, 50 humanos
+- ratio = 1.0 (igual cantidad)
 
 ---
 
@@ -1043,51 +648,39 @@ void testGetStatsWithEqualCounts() {
 ```java
 @Test
 @DisplayName("Debe manejar grandes cantidades de datos")
-void testGetStatsWithLargeNumbers() {
-    when(dnaRecordRepository.countByIsMutant(true)).thenReturn(1000000L);
-    when(dnaRecordRepository.countByIsMutant(false)).thenReturn(2000000L);
-
-    StatsResponse stats = statsService.getStats();
-
-    assertEquals(1000000, stats.getCountMutantDna());
-    assertEquals(2000000, stats.getCountHumanDna());
-    assertEquals(0.5, stats.getRatio(), 0.001);  // 1M / 2M = 0.5
-}
+void testGetStatsWithLargeNumbers()
 ```
 
-**¿Qué prueba?** El servicio **escala** con millones de registros.
+**Caso:**
+- 1,000,000 mutantes
+- 2,000,000 humanos
+- ratio = 0.5
 
-**Tipos de datos:**
-- `long` - Soporta hasta 9,223,372,036,854,775,807
-- Suficiente para aplicaciones reales
+**¿Qué verifica?**
+- El servicio escala con millones de registros
+- Tipo `long` soporta números grandes
 
 ---
 
-## Tests de Integración - MutantControllerTest
-
-### Descripción General
+## Tests del Controller - MutantControllerTest
 
 **Archivo:** `src/test/java/org/example/controller/MutantControllerTest.java`
 
-**Objetivo:** Probar los **endpoints REST** completos.
-
-**Tipo:** Tests de integración con **MockMvc**
-
-**Total de tests:** 8
+**Objetivo:** Verificar que los endpoints REST funcionan correctamente.
 
 ### Configuración
 
 ```java
-@WebMvcTest(MutantController.class)  // Solo carga el Controller
+@WebMvcTest(MutantController.class)
 class MutantControllerTest {
 
     @Autowired
-    private MockMvc mockMvc;  // Simula requests HTTP
+    private MockMvc mockMvc;
 
     @Autowired
-    private ObjectMapper objectMapper;  // Convierte objetos a JSON
+    private ObjectMapper objectMapper;
 
-    @MockBean  // Mock en contexto de Spring
+    @MockBean
     private MutantService mutantService;
 
     @MockBean
@@ -1095,153 +688,99 @@ class MutantControllerTest {
 }
 ```
 
-**@WebMvcTest:**
-- Carga **solo la capa web** (no toda la aplicación)
-- Más rápido que `@SpringBootTest`
-- Perfecto para tests de Controller
-
-**MockMvc:**
+**¿Qué es MockMvc?**
 - Simula requests HTTP sin levantar servidor real
 - No usa puerto 8080
 - Ejecuta el código del Controller directamente
 
 ---
 
-### Test 1: POST /mutant - Retorna 200 para Mutante
+### Test 1: POST /mutant - 200 OK para Mutante
 
 ```java
 @Test
 @DisplayName("POST /mutant debe retornar 200 OK para ADN mutante")
-void testCheckMutantReturns200ForMutant() throws Exception {
-    // ARRANGE
-    String[] mutantDna = {
-        "ATGCGA", "CAGTGC", "TTATGT",
-        "AGAAGG", "CCCCTA", "TCACTG"
-    };
-    DnaRequest request = new DnaRequest(mutantDna);
+void testCheckMutantReturns200ForMutant()
+```
 
-    when(mutantService.analyzeDna(any(String[].class)))
-        .thenReturn(true);  // Mock: es mutante
+**Request simulado:**
+```json
+POST /mutant
+Content-Type: application/json
 
-    // ACT & ASSERT
-    mockMvc.perform(
-        post("/mutant")
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(objectMapper.writeValueAsString(request))
-    )
-    .andExpect(status().isOk());  // 200 OK
+{
+  "dna": ["ATGCGA","CAGTGC","TTATGT","AGAAGG","CCCCTA","TCACTG"]
 }
 ```
 
-**Desglose del test:**
+**Mock:** `analyzeDna()` → `true`
 
-**1. Crear request:**
-```java
-DnaRequest request = new DnaRequest(mutantDna);
-```
-
-**2. Mockear servicio:**
-```java
-when(mutantService.analyzeDna(any(String[].class)))
-    .thenReturn(true);
-```
-
-**3. Simular POST:**
-```java
-mockMvc.perform(
-    post("/mutant")                              // POST a /mutant
-        .contentType(MediaType.APPLICATION_JSON)  // Content-Type: application/json
-        .content(objectMapper.writeValueAsString(request))  // Body JSON
-)
-```
-
-**4. Verificar respuesta:**
-```java
-.andExpect(status().isOk());  // HTTP 200 OK
-```
+**Assertion:** `status().isOk()` (200)
 
 ---
 
-### Test 2: POST /mutant - Retorna 403 para Humano
+### Test 2: POST /mutant - 403 Forbidden para Humano
 
 ```java
 @Test
 @DisplayName("POST /mutant debe retornar 403 Forbidden para ADN humano")
-void testCheckMutantReturns403ForHuman() throws Exception {
-    String[] humanDna = {
-        "ATGCGA", "CAGTGC", "TTATTT",
-        "AGACGG", "GCGTCA", "TCACTG"
-    };
-    DnaRequest request = new DnaRequest(humanDna);
-
-    when(mutantService.analyzeDna(any(String[].class)))
-        .thenReturn(false);  // Mock: es humano
-
-    mockMvc.perform(
-        post("/mutant")
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(objectMapper.writeValueAsString(request))
-    )
-    .andExpect(status().isForbidden());  // 403 Forbidden
-}
+void testCheckMutantReturns403ForHuman()
 ```
 
-**Código HTTP 403:** Forbidden (no es mutante).
+**Mock:** `analyzeDna()` → `false`
+
+**Assertion:** `status().isForbidden()` (403)
 
 **Lógica del Controller:**
 ```java
 return isMutant
-    ? ResponseEntity.ok().build()           // 200 OK
+    ? ResponseEntity.ok().build()           // 200
     : ResponseEntity.status(HttpStatus.FORBIDDEN).build();  // 403
 ```
 
 ---
 
-### Test 3: POST /mutant - Retorna 400 para DNA Nulo
+### Test 3: POST /mutant - 400 Bad Request para Nulo
 
 ```java
 @Test
 @DisplayName("POST /mutant debe retornar 400 Bad Request para ADN nulo")
-void testCheckMutantReturns400ForNullDna() throws Exception {
-    DnaRequest request = new DnaRequest(null);  // DNA nulo
+void testCheckMutantReturns400ForNullDna()
+```
 
-    mockMvc.perform(
-        post("/mutant")
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(objectMapper.writeValueAsString(request))
-    )
-    .andExpect(status().isBadRequest());  // 400 Bad Request
+**Request:**
+```json
+{
+  "dna": null
 }
 ```
 
-**¿Qué prueba?** La **validación** rechaza DNA nulo.
-
-**Flujo:**
+**¿Qué ocurre?**
 1. Request llega al Controller
 2. `@Validated` dispara Bean Validation
 3. `@ValidDnaSequence` detecta que es nulo
-4. Spring retorna 400 Bad Request automáticamente
+4. Spring retorna 400 automáticamente
+
+**Assertion:** `status().isBadRequest()` (400)
 
 ---
 
-### Test 4: POST /mutant - Retorna 400 para DNA Vacío
+### Test 4: POST /mutant - 400 para Array Vacío
 
 ```java
 @Test
 @DisplayName("POST /mutant debe retornar 400 Bad Request para ADN vacío")
-void testCheckMutantReturns400ForEmptyDna() throws Exception {
-    DnaRequest request = new DnaRequest(new String[]{});  // Array vacío
+void testCheckMutantReturns400ForEmptyDna()
+```
 
-    mockMvc.perform(
-        post("/mutant")
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(objectMapper.writeValueAsString(request))
-    )
-    .andExpect(status().isBadRequest());  // 400 Bad Request
+**Request:**
+```json
+{
+  "dna": []
 }
 ```
 
-**Validación:** Array vacío también es inválido.
+**Validación:** Array vacío también es inválido
 
 ---
 
@@ -1250,38 +789,22 @@ void testCheckMutantReturns400ForEmptyDna() throws Exception {
 ```java
 @Test
 @DisplayName("GET /stats debe retornar estadísticas correctamente")
-void testGetStatsReturnsCorrectData() throws Exception {
-    // ARRANGE
-    StatsResponse statsResponse = new StatsResponse(40, 100, 0.4);
-    when(statsService.getStats()).thenReturn(statsResponse);
-
-    // ACT & ASSERT
-    mockMvc.perform(
-        get("/stats")
-            .contentType(MediaType.APPLICATION_JSON)
-    )
-    .andExpect(status().isOk())
-    .andExpect(jsonPath("$.count_mutant_dna").value(40))
-    .andExpect(jsonPath("$.count_human_dna").value(100))
-    .andExpect(jsonPath("$.ratio").value(0.4));
-}
+void testGetStatsReturnsCorrectData()
 ```
 
-**jsonPath()** - Verifica campos del JSON:
+**Mock:** `getStats()` → `StatsResponse(40, 100, 0.4)`
 
+**Assertions con jsonPath:**
 ```java
 .andExpect(jsonPath("$.count_mutant_dna").value(40))
-//                   ↑ Ruta JSON          ↑ Valor esperado
+.andExpect(jsonPath("$.count_human_dna").value(100))
+.andExpect(jsonPath("$.ratio").value(0.4))
 ```
 
-**JSON retornado:**
-```json
-{
-  "count_mutant_dna": 40,
-  "count_human_dna": 100,
-  "ratio": 0.4
-}
-```
+**¿Qué es jsonPath?**
+- Verifica campos específicos del JSON
+- `$` = raíz del JSON
+- `.count_mutant_dna` = campo del objeto
 
 ---
 
@@ -1290,22 +813,12 @@ void testGetStatsReturnsCorrectData() throws Exception {
 ```java
 @Test
 @DisplayName("GET /stats debe retornar 200 OK incluso sin datos")
-void testGetStatsReturns200WithNoData() throws Exception {
-    StatsResponse statsResponse = new StatsResponse(0, 0, 0.0);
-    when(statsService.getStats()).thenReturn(statsResponse);
-
-    mockMvc.perform(
-        get("/stats")
-            .contentType(MediaType.APPLICATION_JSON)
-    )
-    .andExpect(status().isOk())
-    .andExpect(jsonPath("$.count_mutant_dna").value(0))
-    .andExpect(jsonPath("$.count_human_dna").value(0))
-    .andExpect(jsonPath("$.ratio").value(0.0));
-}
+void testGetStatsReturns200WithNoData()
 ```
 
-**¿Qué prueba?** Endpoint funciona incluso con BD vacía.
+**¿Qué verifica?**
+- Endpoint funciona incluso con BD vacía
+- Retorna `(0, 0, 0.0)`
 
 ---
 
@@ -1314,19 +827,20 @@ void testGetStatsReturns200WithNoData() throws Exception {
 ```java
 @Test
 @DisplayName("POST /mutant debe rechazar request sin body")
-void testCheckMutantRejectsEmptyBody() throws Exception {
-    mockMvc.perform(
-        post("/mutant")
-            .contentType(MediaType.APPLICATION_JSON)
-            // NO se incluye .content() → body vacío
-    )
-    .andExpect(status().isBadRequest());  // 400 Bad Request
-}
+void testCheckMutantRejectsEmptyBody()
 ```
 
-**¿Qué prueba?** Request sin body retorna 400.
+**Request:**
+```http
+POST /mutant
+Content-Type: application/json
 
-**GlobalExceptionHandler** captura `HttpMessageNotReadableException`.
+(sin body)
+```
+
+**GlobalExceptionHandler** captura `HttpMessageNotReadableException`
+
+**Assertion:** `status().isBadRequest()` (400)
 
 ---
 
@@ -1335,179 +849,102 @@ void testCheckMutantRejectsEmptyBody() throws Exception {
 ```java
 @Test
 @DisplayName("POST /mutant debe aceptar Content-Type application/json")
-void testCheckMutantAcceptsJsonContentType() throws Exception {
-    String[] mutantDna = {
-        "ATGCGA", "CAGTGC", "TTATGT",
-        "AGAAGG", "CCCCTA", "TCACTG"
-    };
-    DnaRequest request = new DnaRequest(mutantDna);
-
-    when(mutantService.analyzeDna(any(String[].class)))
-        .thenReturn(true);
-
-    mockMvc.perform(
-        post("/mutant")
-            .contentType(MediaType.APPLICATION_JSON)  // ← Importante
-            .content(objectMapper.writeValueAsString(request))
-    )
-    .andExpect(status().isOk());
-}
+void testCheckMutantAcceptsJsonContentType()
 ```
 
-**¿Qué prueba?** Acepta `Content-Type: application/json`.
-
-**Otros Content-Types (no aceptados):**
-- `application/xml`
-- `text/plain`
-- `multipart/form-data`
+**¿Qué verifica?**
+- Acepta `Content-Type: application/json`
+- Otros tipos (XML, plain text) no son aceptados
 
 ---
 
-## Mejores Prácticas
+## Ejecutar Tests
 
-### 1. Patrón AAA (Arrange-Act-Assert)
+### Comandos Básicos
 
-```java
-@Test
-void testEjemplo() {
-    // ARRANGE (Preparar) - Configurar datos y mocks
-    String[] dna = {"ATGC", "ATGC", "ATGC", "ATGC"};
-    when(service.analyze(dna)).thenReturn(true);
+```bash
+# Todos los tests
+./gradlew test
 
-    // ACT (Actuar) - Ejecutar el método bajo prueba
-    boolean result = controller.check(dna);
+# Test específico
+./gradlew test --tests MutantDetectorTest
+./gradlew test --tests MutantServiceTest
+./gradlew test --tests StatsServiceTest
+./gradlew test --tests MutantControllerTest
 
-    // ASSERT (Afirmar) - Verificar resultado
-    assertTrue(result);
+# Con reporte de cobertura
+./gradlew test jacocoTestReport
+
+# Solo compilar (sin tests)
+./gradlew build -x test
+
+# Limpiar y ejecutar tests
+./gradlew clean test
+```
+
+### En Windows
+
+```bash
+gradlew.bat test
+gradlew.bat test --tests MutantDetectorTest
+gradlew.bat test jacocoTestReport
+```
+
+---
+
+## Cobertura de Código
+
+### Generar Reporte JaCoCo
+
+```bash
+./gradlew test jacocoTestReport
+```
+
+**Reporte en:** `build/reports/jacoco/test/html/index.html`
+
+### Métricas por Archivo
+
+| Clase | Cobertura | Líneas Cubiertas |
+|-------|-----------|------------------|
+| MutantDetector | 96% | 150/156 |
+| MutantService | 95% | 45/47 |
+| StatsService | 100% | 20/20 |
+| MutantController | 100% | 25/25 |
+| DnaRecord (entity) | 71% | - |
+| DTOs | 71% | - |
+
+**Nota sobre Lombok:**
+- Lombok genera código automático (equals, hashCode, toString)
+- Esto baja la cobertura reportada
+- Lo importante: **lógica de negocio >90%**
+
+### Configuración JaCoCo
+
+```gradle
+jacoco {
+    toolVersion = "0.8.11"
+}
+
+jacocoTestReport {
+    dependsOn test
+    reports {
+        xml.required = true
+        html.required = true
+    }
+    afterEvaluate {
+        classDirectories.setFrom(files(classDirectories.files.collect {
+            fileTree(dir: it, exclude: [
+                '**/MutantDetectorApplication.class',
+                '**/config/**'
+            ])
+        }))
+    }
 }
 ```
 
-### 2. Nombres Descriptivos
-
-**❌ Mal:**
-```java
-@Test
-void test1() { ... }
-```
-
-**✅ Bien:**
-```java
-@Test
-@DisplayName("Debe detectar mutante con secuencias horizontal y diagonal")
-void testMutantWithHorizontalAndDiagonalSequences() { ... }
-```
-
-### 3. Un Assert por Concepto
-
-**❌ Mal:**
-```java
-@Test
-void testMultiple() {
-    assertTrue(isMutant(dna1));
-    assertFalse(isMutant(dna2));
-    assertTrue(isMutant(dna3));  // Si falla, no sabes cuál
-}
-```
-
-**✅ Bien:**
-```java
-@Test
-void testMutant() {
-    assertTrue(isMutant(dna1));
-}
-
-@Test
-void testHuman() {
-    assertFalse(isMutant(dna2));
-}
-
-@Test
-void testAnotherMutant() {
-    assertTrue(isMutant(dna3));
-}
-```
-
-### 4. Tests Independientes
-
-**❌ Mal:**
-```java
-private static String[] sharedDna;  // Estado compartido
-
-@Test
-void test1() {
-    sharedDna = new String[]{"ATGC"};  // Modifica estado
-}
-
-@Test
-void test2() {
-    // Depende de test1 😱
-    assertEquals(4, sharedDna.length);
-}
-```
-
-**✅ Bien:**
-```java
-@BeforeEach
-void setUp() {
-    // Cada test tiene estado limpio
-    detector = new MutantDetector();
-}
-
-@Test
-void test1() {
-    String[] dna = {"ATGC"};  // Local
-}
-
-@Test
-void test2() {
-    String[] dna = {"ATGC"};  // Independiente
-}
-```
-
-### 5. Verificar Comportamiento, No Implementación
-
-**❌ Mal:**
-```java
-@Test
-void testInternal() {
-    // Verificar detalles internos
-    verify(detector).checkHorizontal(any(), anyInt(), anyInt());
-}
-```
-
-**✅ Bien:**
-```java
-@Test
-void testBehavior() {
-    // Verificar comportamiento público
-    assertTrue(detector.isMutant(dna));
-}
-```
-
-### 6. Tests Rápidos
-
-- ⚡ Tests unitarios: < 100ms
-- ⚡ Tests de integración: < 1s
-- ❌ Si son lentos, considera usar mocks
-
-### 7. Cobertura de Casos Borde
-
-Siempre probar:
-- ✅ Valores normales
-- ✅ Valores límite (0, máximo, mínimo)
-- ✅ Valores nulos
-- ✅ Valores vacíos
-- ✅ Valores inválidos
-
-### 8. Mensajes de Error Claros
-
-```java
-// ❌ Mal
-assertTrue(result);
-
-// ✅ Bien
-assertTrue(result, "DNA con 2 secuencias horizontales debe ser mutante");
-```
+**Exclusiones:**
+- Clase main (`MutantDetectorApplication`)
+- Configuraciones (`SwaggerConfig`)
 
 ---
 
@@ -1515,56 +952,33 @@ assertTrue(result, "DNA con 2 secuencias horizontales debe ser mutante");
 
 ### Estadísticas del Proyecto
 
-| Tipo de Test | Cantidad | Archivo | Cobertura |
-|--------------|----------|---------|-----------|
-| Unitarios (sin mocks) | 16 | MutantDetectorTest | ~96% |
-| Unitarios (con mocks) | 5 | MutantServiceTest | ~95% |
-| Unitarios (con mocks) | 6 | StatsServiceTest | 100% |
-| Integración | 8 | MutantControllerTest | 100% |
-| **TOTAL** | **35** | - | **~90%** |
+| Métrica | Valor |
+|---------|-------|
+| **Tests Totales** | 35 |
+| **Tests Unitarios** | 27 |
+| **Tests Integración** | 8 |
+| **Cobertura Total** | ~90% |
+| **Tiempo Ejecución** | <5 segundos |
 
-### Comandos para Ejecutar Tests
+### Buenas Prácticas Aplicadas
 
-```bash
-# Todos los tests (Windows)
-gradlew.bat test
-
-# Todos los tests (Linux/Mac)
-./gradlew test
-
-# Test específico
-gradlew.bat test --tests MutantDetectorTest
-
-# Con reporte de cobertura
-gradlew.bat test jacocoTestReport
-
-# Ver reporte: build/reports/jacoco/test/html/index.html
-```
-
-### Conceptos Clave Aprendidos
-
-1. **Tests Unitarios** - Probar una unidad aislada
-2. **Tests de Integración** - Probar componentes trabajando juntos
-3. **Mocking** - Simular dependencias para aislar la unidad bajo prueba
-4. **Mockito** - Librería para crear mocks en Java
-5. **MockMvc** - Simular requests HTTP sin servidor
-6. **Assertions** - Verificar resultados esperados
-7. **Verify** - Verificar que se llamaron métodos
-8. **@BeforeEach** - Ejecutar antes de cada test
-9. **AAA Pattern** - Arrange-Act-Assert
-10. **Cobertura de Código** - Porcentaje de código ejecutado por tests
+✅ **Nombres descriptivos** - `@DisplayName` en cada test  
+✅ **Patrón AAA** - Arrange, Act, Assert  
+✅ **Tests independientes** - No comparten estado  
+✅ **Mocks para aislamiento** - Sin dependencias externas  
+✅ **Verificaciones completas** - Assert + Verify  
+✅ **Cobertura alta** - >90% en lógica de negocio  
+✅ **Fast tests** - Ejecución rápida
 
 ---
 
-## 🎓 Conclusión
+## Conclusión
 
-Este proyecto tiene una **excelente suite de tests** que cubre:
+La suite de tests de este proyecto garantiza:
 
-✅ **Algoritmo completo** - Todos los casos mutantes, humanos y validaciones
-✅ **Lógica de negocio** - Caché, hash, persistencia
-✅ **Estadísticas** - Todos los casos de ratio
-✅ **API REST** - Todos los códigos HTTP (200, 403, 400)
-✅ **Validaciones** - Casos inválidos bien manejados
-✅ **Optimizaciones** - Early termination verificado
+🔒 **Confiabilidad** - Código probado en múltiples escenarios  
+🚀 **Mantenibilidad** - Tests como documentación viva  
+🐛 **Detección temprana** - Bugs encontrados antes de producción  
+♻️ **Refactoring seguro** - Cambios sin miedo a romper funcionalidad
 
-**Resultado:** Código robusto, confiable y listo para producción. 🚀
+**Resultado:** Código robusto, testeado y listo para producción. ✅
