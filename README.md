@@ -106,7 +106,7 @@ src/main/java/org/example/
 
 A continuación se muestra el flujo detallado de la detección de mutantes, incluyendo el sistema de caché con hash SHA-256:
 
-![Diagrama de Secuencia](diagrama-secuencia.puml)
+![Diagrama de Secuencia](diagrama-secuencia.png)
 
 *Para generar el diagrama, usa el archivo `diagrama-secuencia.puml` con PlantUML*
 
