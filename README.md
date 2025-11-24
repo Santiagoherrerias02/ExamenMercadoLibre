@@ -510,16 +510,6 @@ ExamenMercadoLibre/
 
 ---
 
-## 🤝 Contribuir
-
-Este proyecto es parte de un examen técnico. Para reportar bugs o sugerencias:
-
-1. Abrir un Issue
-2. Describir el problema/mejora
-3. (Opcional) Crear un Pull Request
-
----
-
 ## 📄 Licencia
 
 MIT License - Ver [LICENSE](LICENSE) para más detalles.
