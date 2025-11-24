@@ -514,7 +514,3 @@ ExamenMercadoLibre/
 ## 📄 Licencia
 
 MIT License - Ver [LICENSE](LICENSE) para más detalles.
-
-## Comentario
-
-Queria probar lo de docker por eso esta el archivo (Dockerfile)
