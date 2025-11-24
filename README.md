@@ -29,7 +29,7 @@ API REST para detectar mutantes analizando secuencias de ADN - Examen MercadoLib
 
 ```bash
 # Clonar repositorio
-git clone <tu-repo>
+git clone https://github.com/Santiagoherrerias02/ExamenMercadoLibre.git
 cd ExamenMercadoLibre
 
 # Compilar y ejecutar tests
@@ -106,9 +106,9 @@ src/main/java/org/example/
 
 A continuación se muestra el flujo detallado de la detección de mutantes, incluyendo el sistema de caché con hash SHA-256:
 
-![Diagrama de Secuencia](docs/diagrama-secuencia.png)
+![Diagrama de Secuencia](diagrama-secuencia.puml)
 
-*Para generar el diagrama, usa el archivo `docs/diagrama-secuencia.puml` con PlantUML*
+*Para generar el diagrama, usa el archivo `diagrama-secuencia.puml` con PlantUML*
 
 ### Casos de Uso Principales
 
@@ -392,7 +392,7 @@ FROM eclipse-temurin:21-jre-alpine
 - **[README.md](README.md)** - Este archivo
 - **[GUIA_EVALUACION_ESTUDIANTE.md](GUIA_EVALUACION_ESTUDIANTE.md)** - Guía detallada del examen con criterios de evaluación
 - **[documentacionTest.md](documentacionTest.md)** - Explicación completa de todos los tests con teoría de mocking
-- **[docs/diagrama-secuencia.puml](docs/diagrama-secuencia.puml)** - Diagrama PlantUML del flujo completo
+- **[diagrama-secuencia.puml](diagrama-secuencia.puml)** - Diagrama PlantUML del flujo completo
 
 ### Swagger UI
 
