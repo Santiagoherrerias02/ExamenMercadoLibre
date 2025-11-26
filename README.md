@@ -457,6 +457,7 @@ ExamenMercadoLibre/
 │   │   │   ├── 📁 exception/
 │   │   │   └── 📁 config/
 │   │   └── 📁 resources/
+|   |       ├── application-prod.properties
 │   │       └── application.properties
 │   └── 📁 test/
 │       └── 📁 java/org/example/
