@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>StatsService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ExamenMercadoLibre</a> &gt; <a href="index.source.html" class="el_package">org.example.service</a> &gt; <span class="el_source">StatsService.java</span></div><h1>StatsService.java</h1><pre class="source lang-java linenums">package org.example.service;
+
+import lombok.RequiredArgsConstructor;
+import org.example.dto.StatsResponse;
+import org.example.repository.DnaRecordRepository;
+import org.springframework.stereotype.Service;
+
+@Service
+<span class="fc" id="L9">@RequiredArgsConstructor</span>
+public class StatsService {
+
+    private final DnaRecordRepository dnaRecordRepository;
+
+    /**
+     * Obtiene estadísticas de verificaciones de ADN.
+     *
+     * Retorna:
+     * - count_mutant_dna: Cantidad de mutantes
+     * - count_human_dna: Cantidad de humanos
+     * - ratio: mutantes / humanos
+     */
+    public StatsResponse getStats() {
+<span class="fc" id="L23">        long countMutant = dnaRecordRepository.countByIsMutant(true);</span>
+<span class="fc" id="L24">        long countHuman = dnaRecordRepository.countByIsMutant(false);</span>
+
+        // Calcular ratio
+<span class="fc" id="L27">        double ratio = calculateRatio(countMutant, countHuman);</span>
+
+<span class="fc" id="L29">        return new StatsResponse(countMutant, countHuman, ratio);</span>
+    }
+
+    /**
+     * Calcula el ratio: mutantes / humanos
+     *
+     * Casos especiales:
+     * - Si no hay humanos y hay mutantes: retorna countMutant
+     * - Si no hay ninguno: retorna 0.0
+     */
+    private double calculateRatio(long countMutant, long countHuman) {
+<span class="fc bfc" id="L40" title="All 2 branches covered.">        if (countHuman == 0) {</span>
+<span class="fc bfc" id="L41" title="All 2 branches covered.">            return countMutant &gt; 0 ? (double) countMutant : 0.0;</span>
+        }
+<span class="fc" id="L43">        return (double) countMutant / countHuman;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

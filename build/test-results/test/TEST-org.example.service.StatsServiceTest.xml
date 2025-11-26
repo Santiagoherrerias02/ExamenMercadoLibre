@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="org.example.service.StatsServiceTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2025-11-24T19:49:43.249Z" hostname="VIVOBOOK16SANTI" time="0.067">
+  <properties/>
+  <testcase name="Debe retornar ratio 1.0 cuando hay igual cantidad" classname="org.example.service.StatsServiceTest" time="0.013"/>
+  <testcase name="Debe calcular estadísticas correctamente" classname="org.example.service.StatsServiceTest" time="0.005"/>
+  <testcase name="Debe manejar grandes cantidades de datos" classname="org.example.service.StatsServiceTest" time="0.012"/>
+  <testcase name="Debe retornar ratio correcto cuando no hay humanos" classname="org.example.service.StatsServiceTest" time="0.006"/>
+  <testcase name="Debe calcular ratio con decimales correctamente" classname="org.example.service.StatsServiceTest" time="0.006"/>
+  <testcase name="Debe retornar ratio 0 cuando no hay datos" classname="org.example.service.StatsServiceTest" time="0.016"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

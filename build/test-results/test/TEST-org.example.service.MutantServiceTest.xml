@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="org.example.service.MutantServiceTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2025-11-24T19:49:42.707Z" hostname="VIVOBOOK16SANTI" time="0.533">
+  <properties/>
+  <testcase name="Debe guardar registro con hash correcto" classname="org.example.service.MutantServiceTest" time="0.485"/>
+  <testcase name="Debe analizar ADN mutante y guardarlo en DB" classname="org.example.service.MutantServiceTest" time="0.008"/>
+  <testcase name="Debe analizar ADN humano y guardarlo en DB" classname="org.example.service.MutantServiceTest" time="0.009"/>
+  <testcase name="Debe generar hash consistente para el mismo ADN" classname="org.example.service.MutantServiceTest" time="0.01"/>
+  <testcase name="Debe retornar resultado cacheado si el ADN ya fue analizado" classname="org.example.service.MutantServiceTest" time="0.006"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

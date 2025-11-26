@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="org.example.controller.MutantControllerTest" tests="8" skipped="0" failures="0" errors="0" timestamp="2025-11-24T19:49:41.574Z" hostname="VIVOBOOK16SANTI" time="1.055">
+  <properties/>
+  <testcase name="POST /mutant debe rechazar request sin body" classname="org.example.controller.MutantControllerTest" time="0.52"/>
+  <testcase name="GET /stats debe retornar 200 OK incluso sin datos" classname="org.example.controller.MutantControllerTest" time="0.216"/>
+  <testcase name="POST /mutant debe retornar 400 Bad Request para ADN vacío" classname="org.example.controller.MutantControllerTest" time="0.249"/>
+  <testcase name="POST /mutant debe retornar 400 Bad Request para ADN nulo" classname="org.example.controller.MutantControllerTest" time="0.006"/>
+  <testcase name="POST /mutant debe retornar 200 OK para ADN mutante" classname="org.example.controller.MutantControllerTest" time="0.018"/>
+  <testcase name="GET /stats debe retornar estadísticas correctamente" classname="org.example.controller.MutantControllerTest" time="0.008"/>
+  <testcase name="POST /mutant debe retornar 403 Forbidden para ADN humano" classname="org.example.controller.MutantControllerTest" time="0.009"/>
+  <testcase name="POST /mutant debe aceptar Content-Type application/json" classname="org.example.controller.MutantControllerTest" time="0.01"/>
+  <system-out><![CDATA[16:49:35.239 [Test worker] INFO org.springframework.test.context.support.AnnotationConfigContextLoaderUtils -- Could not detect default configuration classes for test class [org.example.controller.MutantControllerTest]: MutantControllerTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+16:49:35.673 [Test worker] INFO org.springframework.boot.test.context.SpringBootTestContextBootstrapper -- Found @SpringBootConfiguration org.example.MutantDetectorApplication for test class org.example.controller.MutantControllerTest
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+ :: Spring Boot ::                (v3.2.0)
+
+2025-11-24T16:49:36.747-03:00  INFO 9564 --- [Mutant Detector API] [    Test worker] o.e.controller.MutantControllerTest      : Starting MutantControllerTest using Java 21.0.8 with PID 9564 (started by herre_svb7nji in C:\UTN\Proyecto\ExamenMercadoLibre)
+2025-11-24T16:49:36.748-03:00 DEBUG 9564 --- [Mutant Detector API] [    Test worker] o.e.controller.MutantControllerTest      : Running with Spring Boot v3.2.0, Spring v6.1.1
+2025-11-24T16:49:36.749-03:00  INFO 9564 --- [Mutant Detector API] [    Test worker] o.e.controller.MutantControllerTest      : No active profile set, falling back to 1 default profile: "default"
+2025-11-24T16:49:41.441-03:00  INFO 9564 --- [Mutant Detector API] [    Test worker] o.s.b.t.m.w.SpringBootMockServletContext : Initializing Spring TestDispatcherServlet ''
+2025-11-24T16:49:41.441-03:00  INFO 9564 --- [Mutant Detector API] [    Test worker] o.s.t.web.servlet.TestDispatcherServlet  : Initializing Servlet ''
+2025-11-24T16:49:41.449-03:00  INFO 9564 --- [Mutant Detector API] [    Test worker] o.s.t.web.servlet.TestDispatcherServlet  : Completed initialization in 3 ms
+2025-11-24T16:49:41.534-03:00  INFO 9564 --- [Mutant Detector API] [    Test worker] o.e.controller.MutantControllerTest      : Started MutantControllerTest in 5.638 seconds (process running for 9.064)
+]]></system-out>
+  <system-err><![CDATA[WARNING: A Java agent has been loaded dynamically (C:\Users\herre_svb7nji\.gradle\caches\modules-2\files-2.1\net.bytebuddy\byte-buddy-agent\1.14.10\90ed94ac044ea8953b224304c762316e91fd6b31\byte-buddy-agent-1.14.10.jar)
+WARNING: If a serviceability tool is in use, please run with -XX:+EnableDynamicAgentLoading to hide this warning
+WARNING: If a serviceability tool is not in use, please run with -Djdk.instrument.traceUsage for more information
+WARNING: Dynamic loading of agents will be disallowed by default in a future release
+]]></system-err>
+</testsuite>

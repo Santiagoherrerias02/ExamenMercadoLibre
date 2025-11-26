@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="org.example.service.MutantDetectorTest" tests="16" skipped="0" failures="0" errors="0" timestamp="2025-11-24T19:49:42.643Z" hostname="VIVOBOOK16SANTI" time="0.048">
+  <properties/>
+  <testcase name="Debe usar early termination para eficiencia" classname="org.example.service.MutantDetectorTest" time="0.012"/>
+  <testcase name="Debe detectar mutante con diagonales ascendentes y descendentes" classname="org.example.service.MutantDetectorTest" time="0.001"/>
+  <testcase name="Debe rechazar matriz no cuadrada" classname="org.example.service.MutantDetectorTest" time="0.006"/>
+  <testcase name="Debe detectar mutante en matriz grande 10x10" classname="org.example.service.MutantDetectorTest" time="0.001"/>
+  <testcase name="Debe detectar mutante en matriz mínima 4x4" classname="org.example.service.MutantDetectorTest" time="0.001"/>
+  <testcase name="Debe rechazar matriz muy pequeña (menor a 4x4)" classname="org.example.service.MutantDetectorTest" time="0.001"/>
+  <testcase name="Debe detectar mutante con múltiples secuencias horizontales" classname="org.example.service.MutantDetectorTest" time="0.001"/>
+  <testcase name="Debe detectar mutante con secuencias verticales" classname="org.example.service.MutantDetectorTest" time="0.001"/>
+  <testcase name="Debe detectar mutante con secuencias horizontal y diagonal" classname="org.example.service.MutantDetectorTest" time="0.001"/>
+  <testcase name="Debe rechazar caracteres inválidos" classname="org.example.service.MutantDetectorTest" time="0.001"/>
+  <testcase name="Debe detectar mutante con todas las bases iguales" classname="org.example.service.MutantDetectorTest" time="0.0"/>
+  <testcase name="No debe detectar mutante con una sola secuencia" classname="org.example.service.MutantDetectorTest" time="0.001"/>
+  <testcase name="No debe detectar mutante sin secuencias" classname="org.example.service.MutantDetectorTest" time="0.001"/>
+  <testcase name="Debe rechazar ADN nulo" classname="org.example.service.MutantDetectorTest" time="0.001"/>
+  <testcase name="Debe rechazar ADN vacío" classname="org.example.service.MutantDetectorTest" time="0.001"/>
+  <testcase name="Debe rechazar fila nula en el array" classname="org.example.service.MutantDetectorTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>
