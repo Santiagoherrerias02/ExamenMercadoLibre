@@ -19,8 +19,8 @@ public class SwaggerConfig {
                         .description("API REST para detectar mutantes mediante análisis de secuencias de ADN. " +
                                 "Desarrollado como examen técnico para MercadoLibre Backend Developer.")
                         .contact(new Contact()
-                                .name("Tu Nombre")
-                                .email("tu.email@example.com"))
+                                .name("Santiago Herrerias")
+                                .email("santiago.herrerias.utn@gmail.com"))
                         .license(new License()
                                 .name("MIT License")
                                 .url("https://opensource.org/licenses/MIT")));
